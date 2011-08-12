@@ -1,0 +1,13 @@
+# funnyplaces
+
+An experimental Clojure client library for Factual's Places API
+
+## Usage
+
+TODO!
+
+## License
+
+Copyright (C) 2011 Aaron Crow and Factual
+
+Distributed under the Eclipse Public License, the same as Clojure.
