@@ -8,7 +8,7 @@
   (:import (com.google.api.client.http GenericUrl)))
   
 
-(def *factual-config* {})
+(declare *factual-config*)
 
 (def *base-url* "http://api.v3.factual.com/")
 
@@ -41,6 +41,7 @@
   (slurp* (.getContent (.execute (make-req gurl)))))
 
 (defn make-gurl [path opts]
+  (println "make-gurl opts:" opts)
   (doto
     (GenericUrl. (str *base-url* path))
     (.putAll opts)))
@@ -48,16 +49,16 @@
 (defn get-hashmap [gurl]
   (read-json (get-resp gurl)))
 
-(defn str-keys [amap]
-  (reduce #(assoc %1 (as-str (key %2)) (val %2)) {} amap))
+(defn coerce-opts
+  "Grooms the specified hashmap of query parameters for url inclusion.
+   - keys are coerced to strings
+   - values are turned into their json string representation"
+  [opts]
+  (reduce #(assoc %1 (as-str (key %2)) (json-str (val %2))) {} opts))
 
 (defn fetch [table & {:keys [limit]
-                     :or {limit 10}
+                      :or {limit 10}
                       :as opts}]
-  (println "FETCH OPTS:" opts)
-  (let [gurl (make-gurl (str "t/" (as-str table)) (str-keys opts))
-        resp (get-hashmap gurl)]
-    (get-in resp [:response :data])))
-
-(defn crosswalk [] ;;{:keys [factual-id only namespace namespace-id]}
-  (get-hashmap (make-url-str "places/crosswalk" {:factual_id "97598010-433f-4946-8fd5-4a6dd1639d77"})))
+  (let [gurl (make-gurl (str "t/" (as-str table)) (coerce-opts opts))
+        _ (println "fetch gurl:" (str gurl))]
+    (get-hashmap gurl)))
