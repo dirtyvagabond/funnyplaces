@@ -1,6 +1,6 @@
 # funnyplaces
 
-funnyplaces is an experimental Clojure based cient for Factual's API. It currently supports a basic fetch function, which allows you to run rich queries against Factual's datasets, including their Places data.
+funnyplaces is an experimental Clojure client for Factual's API. It supports rich queries against Factual's datasets, including their Places data.
 
 ## Basic Usage
 
@@ -55,6 +55,21 @@ You can get at this metadata by using Clojure's meta function on the result you 
 	(fetch :places
 	       :filters {:name "Stand"}
 	       :geo {"$circle" {"$center" [34.06018, -118.41835] "$meters" 5000}})
+
+## Crossref Usage
+
+The <tt>get-factid</tt> function takes a URL and returns the Factual ID for the place mentioned on the specified URL. For example: 
+
+	> (get-factid "https://foursquare.com/venue/215159")
+	[{:url "https://foursquare.com/venue/215159", :is_canonical true, :factual_id "97598010-433f-4946-8fd5-4a6dd1639d77"}]
+
+	;; Return all URLs where the place identified by the specified Factual ID is mentioned
+	(get-urls "97598010-433f-4946-8fd5-4a6dd1639d77")
+
+Just as with <tt>fetch</tt>, these Crossref functions support the options that the Factual API supports, and they also provide metadata. For example:
+
+	> (meta (get-urls "97598010-433f-4946-8fd5-4a6dd1639d77" :limit 12))
+	{:total_row_count 66, :included_rows 12, :version 3, :status "ok"}
 
 ## License
 

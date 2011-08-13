@@ -1,5 +1,5 @@
 (defproject funnyplaces "1.0-alpha-SNAPSHOT"
-  :description "FIXME: write description"
+  :description "An experimental Clojure client library for Factual's Places API"
   :dependencies [
     [com.google.api.client/google-api-client "1.4.1-beta"]
     [com.google.guava/guava "r09"]
@@ -9,6 +9,7 @@
 
   :dev-dependencies [
     [swank-clojure "1.4.0-SNAPSHOT"]
+    [lein-clojars "0.6.0"]
   ]
 
 

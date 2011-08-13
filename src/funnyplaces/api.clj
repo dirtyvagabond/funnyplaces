@@ -69,10 +69,23 @@
   [gurl]
   (read-json (get-resp gurl)))
 
+(defn pop-meta [res]
+  (let [data (get-in res [:response :data])
+        level1 (dissoc res :response)
+        level2 (dissoc (:response res) :data)]
+    (with-meta data (merge level1 level2))))
+
 (defn fetch [table & {:as opts}]
   (let [gurl (make-gurl (str "t/" (as-str table)) opts)]
-    (let [res (get-hashmap gurl)
-          data (get-in res [:response :data])
-          level1 (dissoc res :response)
-          level2 (dissoc (:response res) :data)]
-      (with-meta data (merge level1 level2)))))
+    (pop-meta (get-hashmap gurl))))
+
+(defn get-factid [url & {:as opts}]
+  (let [opts (assoc opts :url url)
+        gurl (make-gurl "places/crossref" opts)]
+    (pop-meta (get-hashmap gurl))))
+
+(defn get-urls [factid & {:as opts}]
+  (let [opts (assoc opts :factual_id factid)
+        gurl (make-gurl "places/crossref" opts)]
+    (pop-meta (get-hashmap gurl))))
+
