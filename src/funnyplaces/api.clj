@@ -44,7 +44,13 @@
    - keys are coerced to strings
    - values are coerced to json string representations"
   [opts]
-  (reduce #(assoc %1 (as-str (key %2)) (json-str (val %2))) {} opts))
+  (reduce
+   #(assoc %1
+      (as-str (key %2))
+      (if (string? (val %2))
+          (val %2)
+          (json-str (val %2))))
+   {} opts))
 
 (defn make-gurl
   "Builds a GenericUrl pointing to the given path on Factual's API.
