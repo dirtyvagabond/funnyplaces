@@ -71,5 +71,8 @@
 
 (defn fetch [table & {:as opts}]
   (let [gurl (make-gurl (str "t/" (as-str table)) opts)]
-    (get-hashmap gurl)))
-
+    (let [res (get-hashmap gurl)
+          data (get-in res [:response :data])
+          level1 (dissoc res :response)
+          level2 (dissoc (:response res) :data)]
+      (with-meta data (merge level1 level2)))))
