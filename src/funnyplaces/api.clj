@@ -4,10 +4,13 @@
   (:use [clojure.contrib.duck-streams :only [slurp*]])
   (:use [clojure.contrib.def :only [defnk]])
   (:use [clojure.contrib.json])
+  (:use [clojure.contrib.string :only [join as-str]])
   (:import (com.google.api.client.http GenericUrl)))
   
 
 (def *factual-config* {})
+
+(def *base-url* "http://api.v3.factual.com/")
 
 (defn factual!
   [client-key client-secret]
@@ -27,28 +30,31 @@
     (.computeSignature params method url)
     params))
 
-(defn make-req [url method]
+(defn make-req [url]
   (.buildGetRequest 
     (.createRequestFactory
       (NetHttpTransport.)
-      (make-params url method))
-    url))  
+      (make-params url "GET"))
+    url))
 
 (defn resp-body
   "Returns the response body of the specified request."
-  [url method]
-  (slurp* (.getContent (.execute (make-req url method)))))
+  [url-str]
+  (slurp* (.getContent (.execute (make-req (GenericUrl. url-str))))))
 
-(defnk places [:limit 10]
-  (let [resp-map (read-json 
-                   (resp-body (GenericUrl. (str "http://api.v3.factual.com/t/places?limit=" limit)) "GET"))]
-    (get-in resp-map [:response :data])))
+(defn make-url-str [path & opts]
+  (str *base-url* path "?"
+       (join "&" (map #(as-str (key %) "=" (val %)) (first opts)))))
+
+(defn get-hashmap [url]
+  (read-json (resp-body url)))
+
+(defn fetch [table & {:keys [limit]
+                     :or {limit 10}
+                     :as opts}]
+  (let [url (make-url-str (str "t/" (as-str table)) opts)
+        resp (get-hashmap url)]
+    (get-in resp [:response :data])))
 
 (defn crosswalk [] ;;{:keys [factual-id only namespace namespace-id]}
-  (read-json (resp-body (GenericUrl. (str "http://api.v3.factual.com/t/places/crosswalk?factual_id=97598010-433f-4946-8fd5-4a6dd1639d77")) "GET")))
-
-;;(factual! KEY SECRET)
-
-;;; Make the request and print out each line of the response
-;;(doseq [place (places)]
-;; (println place))
+  (get-hashmap (make-url-str "places/crosswalk" {:factual_id "97598010-433f-4946-8fd5-4a6dd1639d77"})))
