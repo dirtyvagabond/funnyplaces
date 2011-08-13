@@ -40,25 +40,30 @@
 (defn get-resp [gurl]
   (slurp* (.getContent (.execute (make-req gurl)))))
 
-(defn make-gurl [path opts]
-  (println "make-gurl opts:" opts)
-  (doto
-    (GenericUrl. (str *base-url* path))
-    (.putAll opts)))
-
-(defn get-hashmap [gurl]
-  (read-json (get-resp gurl)))
-
-(defn coerce-opts
+(defn coerce
   "Grooms the specified hashmap of query parameters for url inclusion.
    - keys are coerced to strings
-   - values are turned into their json string representation"
+   - values are coerced to json string representations"
   [opts]
   (reduce #(assoc %1 (as-str (key %2)) (json-str (val %2))) {} opts))
 
-(defn fetch [table & {:keys [limit]
-                      :or {limit 10}
-                      :as opts}]
-  (let [gurl (make-gurl (str "t/" (as-str table)) (coerce-opts opts))
-        _ (println "fetch gurl:" (str gurl))]
+(defn make-gurl
+  "Builds a GenericUrl pointing to the given path on Factual's API.
+   opts should be a hashmap with all desired query parameters for
+   the resulting url. Values in opts should be primitives or hashmaps;
+   they will be coerced to the proper json string representation for
+   inclusion in the url query string."
+  [path opts]
+  (doto
+    (GenericUrl. (str *base-url* path))
+    (.putAll (coerce opts))))
+
+(defn get-hashmap
+  "Executes a get request to gurl, parses the json response, and returns
+   the result as a hashmap."
+  [gurl]
+  (read-json (get-resp gurl)))
+
+(defn fetch [table & {:as opts}]
+  (let [gurl (make-gurl (str "t/" (as-str table)) opts)]
     (get-hashmap gurl)))
