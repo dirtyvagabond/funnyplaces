@@ -4,29 +4,26 @@ funnyplaces is an experimental Clojure based cient for Factual's API. It current
 
 ## Basic Usage
 
-First, establish your credentials. (You can get your key and secret from TODO)
+Establish credentials:
+
 	> (factual! "YOUR_FACTUAL_KEY" "YOUR_FACTUAL_SECRET")
 
-Now you can use the <tt>fetch</tt> function to run queries against Factual's tables. Here's a simple example that fetches 10 arbitrary locations from Factual's Places table:
+Now you can use the <tt>fetch</tt> function to run queries against Factual's tables:
+
+	;; Fetch 3 Places from Factual
 	>  (fetch :places :limit 3)
 
-The first argument to <tt>fetch</tt> indicates the Factual table. After that, <tt>fetch</tt> takes pairs of query options.
+<tt>fetch</tt> takes the table name as the first argument, then a list of option pairs. It returns a hashmap following Factuals API spec.
 
-The returned value is a hashmap built from Factual's json response. It follows the structure of Factual's specification here:
-https://factual.onconfluence.com/display/docs/Core+API+-+Read
-https://factual.onconfluence.com/display/docs/Core+API+-+Response+Handling
-
-So, for example, let's get the results from the previous query and drill down to just a list of place names:
+Let's rerun the previous query and pull from the results the list of the place names:
 	> (def res (fetch :places :limit 3))
-	> (def plcs (get-in res [:response :data]))
-	> (map :name plcs)
-
-The result of the last statement will look like:
+	> (def places (get-in res [:response :data]))
+	> (map :name places)
 	("Lorillard Tobacco Co." "Imediahouse" "El Monte Wholesale Meats")
 
 Note that we use <tt>get-in</tt> to get to our row data, because Factual returns a nested structure containing more than just data rows.
 
-Here are some more example fetches:
+A few more examples:
 
 	;; Return rows where region equals "CA"
 	(fetch :places :filters {"region" "CA"})
@@ -49,8 +46,6 @@ Running this function looks like:
 
 	> (count-starbucks)
 	8751
-
-
 
 ## License
 

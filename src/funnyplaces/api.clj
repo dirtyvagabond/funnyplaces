@@ -2,9 +2,8 @@
   (:import (com.google.api.client.auth.oauth OAuthHmacSigner OAuthParameters))
   (:import (com.google.api.client.http.javanet NetHttpTransport))
   (:use [clojure.contrib.duck-streams :only [slurp*]])
-  (:use [clojure.contrib.def :only [defnk]])
   (:use [clojure.contrib.json])
-  (:use [clojure.contrib.string :only [join as-str]])
+  (:use [clojure.contrib.string :only [as-str]])
   (:import (com.google.api.client.http GenericUrl)))
   
 
@@ -67,3 +66,4 @@
 (defn fetch [table & {:as opts}]
   (let [gurl (make-gurl (str "t/" (as-str table)) opts)]
     (get-hashmap gurl)))
+

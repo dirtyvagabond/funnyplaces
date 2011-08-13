@@ -1,4 +1,4 @@
-(defproject funnyplaces "1.0.0-SNAPSHOT"
+(defproject funnyplaces "1.0-alpha-SNAPSHOT"
   :description "FIXME: write description"
   :dependencies [
     [com.google.api.client/google-api-client "1.4.1-beta"]
