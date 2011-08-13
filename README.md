@@ -13,9 +13,10 @@ Now you can use the <tt>fetch</tt> function to run queries against Factual's tab
 	;; Fetch 3 Places from Factual
 	>  (fetch :places :limit 3)
 
-<tt>fetch</tt> takes the table name as the first argument, then a list of option pairs. It returns a hashmap following Factuals API spec.
+<tt>fetch</tt> takes the table name as the first argument, then a list of option pairs. It returns a hashmap following Factual's API spec.
 
 Let's rerun the previous query and pull from the results the list of the place names:
+
 	> (def res (fetch :places :limit 3))
 	> (def places (get-in res [:response :data]))
 	> (map :name places)
