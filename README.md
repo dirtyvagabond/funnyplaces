@@ -6,12 +6,12 @@ funnyplaces is an experimental Clojure based cient for Factual's API. It current
 
 Establish credentials:
 
-	> (factual! "YOUR_FACTUAL_KEY" "YOUR_FACTUAL_SECRET")
+	(factual! "YOUR_FACTUAL_KEY" "YOUR_FACTUAL_SECRET")
 
 Now you can use the <tt>fetch</tt> function to run queries against Factual's tables:
 
 	;; Fetch 3 Places from Factual
-	>  (fetch :places :limit 3)
+	(fetch :places :limit 3)
 
 <tt>fetch</tt> takes the table name as the first argument, then a list of option pairs. It returns a hashmap following Factual's API spec.
 
@@ -47,6 +47,14 @@ Running this function looks like:
 
 	> (count-starbucks)
 	8751
+
+More examples:
+
+	;; Do a full text search for rows that contain "Starbucks" or "Santa Monica"
+	(fetch :places :q "Starbucks,Santa Monica")
+
+	;; Do a full text search for rows that contain "Starbucks" or "Santa Monica" and return rows 20-40
+	(fetch :places :q "Starbucks,Santa Monica" :offset 20 :limit 20)
 
 ## License
 
