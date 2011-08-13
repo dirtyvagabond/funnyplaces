@@ -18,7 +18,7 @@
 
 (defn make-params
   "Returns configured OAuth params for the specified request"
-  [url method]
+  [gurl method]
   (let [signer (OAuthHmacSigner.)
         params (OAuthParameters.)]
     (set! (. params consumerKey) (:key *factual-config*))
@@ -27,33 +27,36 @@
       (.computeTimestamp))
     (set! (. signer clientSharedSecret) (:secret *factual-config*))
     (set! (. params signer) signer)
-    (.computeSignature params method url)
+    (.computeSignature params method gurl)
     params))
 
-(defn make-req [url]
+(defn make-req [gurl]
   (.buildGetRequest 
     (.createRequestFactory
       (NetHttpTransport.)
-      (make-params url "GET"))
-    url))
+      (make-params gurl "GET"))
+    gurl))
 
-(defn resp-body
-  "Returns the response body of the specified request."
-  [url-str]
-  (slurp* (.getContent (.execute (make-req (GenericUrl. url-str))))))
+(defn get-resp [gurl]
+  (slurp* (.getContent (.execute (make-req gurl)))))
 
-(defn make-url-str [path & opts]
-  (str *base-url* path "?"
-       (join "&" (map #(as-str (key %) "=" (val %)) (first opts)))))
+(defn make-gurl [path opts]
+  (doto
+    (GenericUrl. (str *base-url* path))
+    (.putAll opts)))
 
-(defn get-hashmap [url]
-  (read-json (resp-body url)))
+(defn get-hashmap [gurl]
+  (read-json (get-resp gurl)))
+
+(defn str-keys [amap]
+  (reduce #(assoc %1 (as-str (key %2)) (val %2)) {} amap))
 
 (defn fetch [table & {:keys [limit]
                      :or {limit 10}
-                     :as opts}]
-  (let [url (make-url-str (str "t/" (as-str table)) opts)
-        resp (get-hashmap url)]
+                      :as opts}]
+  (println "FETCH OPTS:" opts)
+  (let [gurl (make-gurl (str "t/" (as-str table)) (str-keys opts))
+        resp (get-hashmap gurl)]
     (get-in resp [:response :data])))
 
 (defn crosswalk [] ;;{:keys [factual-id only namespace namespace-id]}
