@@ -25,13 +25,19 @@ This means it's easy to compose concise queries. For example:
 	> (map :name (fetch :places :limit 3))
 	("Lorillard Tobacco Co." "Imediahouse" "El Monte Wholesale Meats")
 
-A few more examples:
+Some more examples of <tt>fetch</tt> usage:
 
 	;; Return rows where region equals "CA"
 	(fetch :places :filters {"region" "CA"})
 
 	;; Return rows where name begins with "Starbucks" and return both the data and a total count of the matched rows:
 	(fetch :places :filters {:name {:$bw "Starbucks"}} :include_count true)
+
+	;; Do a full text search for rows that contain "Starbucks" or "Santa Monica"
+	(fetch :places :q "Starbucks,Santa Monica")
+
+	;; Do a full text search for rows that contain "Starbucks" or "Santa Monica" and return rows 20-40
+	(fetch :places :q "Starbucks,Santa Monica" :offset 20 :limit 20)
 
 ## Results Metadata
 
@@ -42,14 +48,6 @@ You can get at this metadata by using Clojure's meta function on the result you 
 	> (def starbucks (fetch :places :filters {:name {:$bw "Starbucks"}} :include_count true))
 	> (meta starbucks)
 	{:total_row_count 8751, :included_rows 20, :version 3, :status "ok"}
-
-More examples:
-
-	;; Do a full text search for rows that contain "Starbucks" or "Santa Monica"
-	(fetch :places :q "Starbucks,Santa Monica")
-
-	;; Do a full text search for rows that contain "Starbucks" or "Santa Monica" and return rows 20-40
-	(fetch :places :q "Starbucks,Santa Monica" :offset 20 :limit 20)
 
 ## Places Usage
 
