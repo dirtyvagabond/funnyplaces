@@ -78,9 +78,7 @@ The <tt>get-urls</tt> function takes a Factual ID and returns URLs that mention 
 
 # Results Metadata
 
-Factual's API returns more than just results rows. It also returns various metadata about the results. For example, responses come with a status indicator, a count of how many rows are being returned, and (if you ask for it) a count of how many total rows match in the underlying Factual dataset. You can access this metadata by using Clojure's <tt>meta</tt> function on your results.
-
-Examples:
+Factual's API returns more than just results rows. It also returns various metadata about the results. You can access this metadata by using Clojure's <tt>meta</tt> function on your results. Examples:
 
 	> (meta (fetch :places :filters {:name {:$bw "Starbucks"}} :include_count true))
 	{:total_row_count 8751, :included_rows 20, :version 3, :status "ok"}
@@ -96,7 +94,7 @@ Examples:
 
 # An Example of Tying Things Together
 
-Let's create a simple function that finds Places with "cafe" in their name, and close to a specific geo location:
+Let's create a simple function that finds Places close to a lat/lng, with "cafe" in their name:
 
 	(defn nearby-cafes
 	  "Returns up to 12 cafes within 5000 meters of the specified location."
@@ -118,7 +116,7 @@ Let's peek at the metadata:
 	> (meta cafes)
 	{:total_row_count 26, :included_rows 12, :version 3, :status "ok"}
 
-Ok, we got back a full 12 results. Note that there's actually a total of 26 cafes near us. Let's take a look at a few of the cafes we got back:
+Ok, we got back a full 12 results, and there's actually a total of 26 cafes near us. Let's take a look at a few of the cafes we got back:
 
 	> (map :name (take 3 cafes))
 	("Aroma Cafe" "Cafe Connection" "Panini Cafe")
@@ -145,14 +143,14 @@ So I wonder what Yelp has to say about this place. Let's use Crosswalk to find o
 	> (crosswalk :factual_id "eb67e10b-b103-41be-8bb5-e077855b7ae7" :only "yelp")
 	[{:url "http://www.yelp.com/biz/aroma-cafe-los-angeles", :factual_id "eb67e10b-b103-41be-8bb5-e077855b7ae7", :namespace_id "AmtMwS2wCbr3l-_S0d9AoQ", :namespace "yelp"}]
 
-That gives me the yelp URL for the Aroma Cafe, should I wish to read up on it. 
+That gives me the yelp URL for the Aroma Cafe, so I can read up on it.
 
-Now, Factual supports other Crosswalked sources besides Yelp. These are the :namespace key value pairs in the results from the crosswalk function. So let's find out what namespaces are available for the Aroma Cafe:
+Of course, Factual supports other Crosswalked sources besides Yelp. If you look at each row returned by the <tt>crosswalk</tt> function, you'll see there's a <tt>:namespace</tt> in each one. Let's find out what namespaces are available for the Aroma Cafe:
 
 	> (map :namespace (crosswalk :factual_id "eb67e10b-b103-41be-8bb5-e077855b7ae7"))
 	("menupages" "manta" "loopt" "urbanspoon" "yp" "gowalla" "yellowbook" "insiderpages" "chow" "merchantcircle" "citysearch" "yahoolocal" "yelp" "urbanspoon" "yp" "allmenus" "menupages" "simplegeo" "foursquare")
 
-You know what might be cool is to create a function that takes a :factual_id and returns a hashmap of each valid namespace to the associated Crosswalked URL:
+Let's create a function that takes a :factual_id and returns a hashmap of each valid namespace to its Crosswalk URL:
 
 	(defn namespaces->urls [factid]
 	  (let [crosswalks (crosswalk :factual_id factid)]
@@ -161,11 +159,11 @@ You know what might be cool is to create a function that takes a :factual_id and
 	     {}
 	     crosswalks)))
 
-So now we can do this:
+Now we can do this:
 
 	> (namespaces->urls "eb67e10b-b103-41be-8bb5-e077855b7ae7")
-	{"foursquare" "https://foursquare.com/venue/38146", 
-	 "menupages" "http://losangeles.menupages.com/restaurants/the-westside-city/", 
-	 "manta" "http://www.manta.com/c/mmcw5s5/aroma-cafe", 
-	 "yahoolocal" "http://local.yahoo.com/info-20400708-aroma-cafe-los-angeles",
+	{"foursquare"  "https://foursquare.com/venue/38146", 
+	 "menupages"   "http://losangeles.menupages.com/restaurants/the-westside-city/", 
+	 "manta"       "http://www.manta.com/c/mmcw5s5/aroma-cafe", 
+	 "yahoolocal"  "http://local.yahoo.com/info-20400708-aroma-cafe-los-angeles",
 	 ... }
