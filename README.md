@@ -87,6 +87,70 @@ Just as with <tt>fetch</tt>, these Crossref functions support the options that t
 	> (meta (get-urls "97598010-433f-4946-8fd5-4a6dd1639d77" :limit 12))
 	{:total_row_count 66, :included_rows 12, :version 3, :status "ok"}
 
+## Tying Things Together
+
+Let's create a simple function that finds cafes close to a geolocation:
+
+	(defn nearby-cafes
+	  "Returns up to 12 cafes within 5000 meters of the specified location."
+	  [lat lon]
+	  (fetch :places
+	         :q "cafe"
+	         :filters {:category {:$eq "Food & Beverage"}}
+	         :geo {:$circle {:$center [lat lon]
+	                         :$meters 5000}}
+	         :include_count true
+	         :limit 12))
+
+An example usage:
+
+	> (def cafes (nearby-cafes 34.06018 -118.41835))
+
+Let's peek at the metadata:
+
+	> (meta cafes)
+	{:total_row_count 26, :included_rows 12, :version 3, :status "ok"}
+
+Ok, we got back a full 12 results, and note that there's actually a total of 26 cafes near us. Let's take a look at a few of the cafes we got back:
+
+	> (map :name (take 3 cafes))
+	("Aroma Cafe" "Cafe Connection" "Panini Cafe")
+
+That first one, "Aroma Cafe", sounds interesting. Let's see the details:
+
+	> (first cafes)
+	{:status "1", :country "US", :longitude -118.423421, :factual_id "eb67e10b-b103-41be-8bb5-e077855b7ae7", :name "Aroma Cafe", :postcode "90064", :locality "Los Angeles", :latitude 34.039792, :region "CA", :address "2530 Overland Ave", :website "http://aromacafe-la.com/", :tel "(310) 836-2919", :category "Food & Beverage"}
+
+So I wonder what Yelp has to say about this place. Let's use Crosswalk to find out. Note that we use Aroma Cafe's :factual_id from the above results...
+
+	> (crosswalk :factual_id "eb67e10b-b103-41be-8bb5-e077855b7ae7" :only "yelp")
+	[{:url "http://www.yelp.com/biz/aroma-cafe-los-angeles", :factual_id "eb67e10b-b103-41be-8bb5-e077855b7ae7", :namespace_id "AmtMwS2wCbr3l-_S0d9AoQ", :namespace "yelp"}]
+
+That gives me the yelp URL for the Aroma Cafe, should I wish to read up on it. 
+
+Now, Factual supports other Crosswalked sources besides Yelp. These are the :namespace key value pairs in the results from the crosswalk function. So let's find out what namespaces are available for the Aroma Cafe:
+
+	> (map :namespace (crosswalk :factual_id "eb67e10b-b103-41be-8bb5-e077855b7ae7"))
+	("menupages" "manta" "loopt" "urbanspoon" "yp" "gowalla" "yellowbook" "insiderpages" "chow" "merchantcircle" "citysearch" "yahoolocal" "yelp" "urbanspoon" "yp" "allmenus" "menupages" "simplegeo" "foursquare")
+
+You know what might be cool is to create a function that takes a :factual_id and returns a hashamp of each valid namespaces to the associated Crosswalked URL:
+
+	(defn namespaces->urls [factid]
+	  (let [crosswalks (crosswalk :factual_id factid)]
+	    (reduce
+	     #(assoc %1 (:namespace %2) (:url %2))
+	     {}
+	     crosswalks)))
+
+So now we can do this:
+
+	> (namespaces->urls "eb67e10b-b103-41be-8bb5-e077855b7ae7")
+	{"foursquare" "https://foursquare.com/venue/38146", 
+	 "menupages" "http://losangeles.menupages.com/restaurants/the-westside-city/", 
+	 "manta" "http://www.manta.com/c/mmcw5s5/aroma-cafe", 
+	 "yahoolocal" "http://local.yahoo.com/info-20400708-aroma-cafe-los-angeles",
+	 ... }
+
 ## License
 
 TODO
