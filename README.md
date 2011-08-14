@@ -77,6 +77,8 @@ The <tt>get-factid</tt> function takes a URL and returns the Factual ID for the 
 	> (get-factid "https://foursquare.com/venue/215159")
 	[{:url "https://foursquare.com/venue/215159", :is_canonical true, :factual_id "97598010-433f-4946-8fd5-4a6dd1639d77"}]
 
+The <tt>get-urls</tt> function takes a Factual ID and returns URLs that mention that place. For example:
+
 	;; Return all URLs where the place identified by the specified Factual ID is mentioned
 	(get-urls "97598010-433f-4946-8fd5-4a6dd1639d77")
 
