@@ -150,7 +150,3 @@ So now we can do this:
 	 "manta" "http://www.manta.com/c/mmcw5s5/aroma-cafe", 
 	 "yahoolocal" "http://local.yahoo.com/info-20400708-aroma-cafe-los-angeles",
 	 ... }
-
-## License
-
-TODO
