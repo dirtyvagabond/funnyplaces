@@ -63,29 +63,32 @@
     (GenericUrl. (str *base-url* path))
     (.putAll (coerce opts))))
 
-(defn get-hashmap
-  "Executes a get request to gurl, parses the json response, and returns
-   the result as a hashmap."
-  [gurl]
-  (read-json (get-resp gurl)))
-
-(defn pop-meta [res]
+(defn tug-meta [res]
   (let [data (get-in res [:response :data])
         level1 (dissoc res :response)
         level2 (dissoc (:response res) :data)]
     (with-meta data (merge level1 level2))))
 
+(defn get-results
+  "Executes the specified query and returns the results.
+   The returned results will have metadata associated with it,
+   built from the results metadata returned by Factual."
+  ([gurl]
+     (tug-meta (read-json (get-resp gurl))))
+  ([path opts]
+     (get-results (make-gurl path opts))))
+
 (defn fetch [table & {:as opts}]
-  (let [gurl (make-gurl (str "t/" (as-str table)) opts)]
-    (pop-meta (get-hashmap gurl))))
+  (get-results (str "t/" (as-str table)) opts))
 
 (defn get-factid [url & {:as opts}]
-  (let [opts (assoc opts :url url)
-        gurl (make-gurl "places/crossref" opts)]
-    (pop-meta (get-hashmap gurl))))
+  (let [opts (assoc opts :url url)]
+    (get-results "places/crossref" opts)))
 
 (defn get-urls [factid & {:as opts}]
-  (let [opts (assoc opts :factual_id factid)
-        gurl (make-gurl "places/crossref" opts)]
-    (pop-meta (get-hashmap gurl))))
+  (let [opts (assoc opts :factual_id factid)]
+    (get-results "places/crossref" opts)))
+
+(defn crosswalk [& {:as opts}]
+  (get-results "places/crosswalk" opts))
 

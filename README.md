@@ -43,7 +43,7 @@ Some more examples of <tt>fetch</tt> usage:
 
 Factual's API returns more than just results rows from a fetch. It also returns various metadata about the results. For example, each response comes with a count of how many rows are being returned, a count of how many total rows match in the underlying Factual dataset (if requested by you), and so on.
 
-You can get at this metadata by using Clojure's meta function on the result you get back from a fetch. For example:
+You can get at this metadata by using Clojure's <tt>meta</tt> function on the result you get back from a fetch. For example:
 
 	> (def starbucks (fetch :places :filters {:name {:$bw "Starbucks"}} :include_count true))
 	> (meta starbucks)
@@ -54,7 +54,21 @@ You can get at this metadata by using Clojure's meta function on the result you 
 	;; Return rows with a name equal to "Stand" within 5000 meters of the specified lat/lng
 	(fetch :places
 	       :filters {:name "Stand"}
-	       :geo {"$circle" {"$center" [34.06018, -118.41835] "$meters" 5000}})
+	       :geo {:$circle {:$center [34.06018, -118.41835] :$meters 5000}})
+
+## Crosswalk Usage
+
+	;; Return all Crosswalk data for the place identified by the specified Factual ID
+	(crosswalk :factual_id "97598010-433f-4946-8fd5-4a6dd1639d77")
+
+	;; Return Loopt.com Crosswalk data for the place identified by the specified Factual ID
+	(crosswalk :factual_id "97598010-433f-4946-8fd5-4a6dd1639d77" :only "loopt")
+
+	;; Return all Crosswalk data for the place identified by the specified Foursquare ID
+	(crosswalk :namespace "foursquare" :namespace_id 215159)
+
+	;; Return the Yelp.com Crosswalk data for the place identified by the specified Foursquare ID: 
+	(crosswalk :namespace "foursquare" :namespace_id 215159 :only "yelp")
 
 ## Crossref Usage
 
