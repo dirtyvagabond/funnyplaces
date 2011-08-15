@@ -1,6 +1,14 @@
 # About
 
-Funnyplaces is an experimental Clojure client for Factual's API. It supports rich queries against Factual's datasets, including their Places data.
+Funnyplaces is an experimental Clojure client for Factual's API. It supports rich queries across Factual's U.S. Places, as well as their Crosswalk and Crossref services.
+
+Factual's [web-based API](http://developer.factual.com/display/docs/Home) offers:
+
+* [Places API](http://developer.factual.com/display/docs/Places+API): Rich queries across a high quality dataset of U.S. Points of Interest and business entities.
+* [Crosswalk](http://developer.factual.com/display/docs/Places+API+-+Crosswalk): Translation between Factual IDs, third party IDs, and URLs that represent the same entity across the internet.
+* [Crossref](http://developer.factual.com/display/docs/Places+API+-+Crossref): Lets you find URLs that contain entities in the Factual places database, or to find out what the Factual ID of a place mentioned on a URL.
+
+Funnyplaces aims to provide an easy and fully featured wrapper for these services.
 
 # Installation
 
@@ -18,7 +26,7 @@ Funnyplaces is hosted at [Clojars](http://clojars.org/funnyplaces). Just add thi
 
 ## Simple Fetch
 
-	;; Fetch 3 Places from Factual
+	;; Fetch 3 random Places from Factual
 	(fetch :places :limit 3)
 
 <tt>fetch</tt> takes the table name as the first argument, followed by a list of option pairs. It returns a sequence of records, where each record is a hashmap representing a row of results. So our results from above will look like:
