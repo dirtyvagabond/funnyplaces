@@ -5,7 +5,8 @@ Funnyplaces is an experimental Clojure client for Factual's API. It supports ric
 # Installation
 
 Funnyplaces is hosted at [Clojars](http://clojars.org/funnyplaces). Just add this to your dependencies:
-<tt>[funnyplaces "1.0-alpha-SNAPSHOT"]</tt>
+
+	[funnyplaces "1.0-alpha-SNAPSHOT"]
 
 # Basics
 
