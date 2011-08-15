@@ -11,10 +11,9 @@ Funnyplaces is hosted at [Clojars](http://clojars.org/funnyplaces). Just add thi
 
 ## Setup
 
-  (ns yournamespace.core
-    (:use funnyplaces.api))
-
-  (factual! "YOUR_FACTUAL_KEY" "YOUR_FACTUAL_SECRET")
+	(ns yournamespace.core
+	  (:use funnyplaces.api))
+	(factual! "YOUR_FACTUAL_KEY" "YOUR_FACTUAL_SECRET")
 
 ## Simple Fetch
 
