@@ -160,14 +160,11 @@ Of course, Factual supports other Crosswalked sources besides Yelp. If you look 
 	> (map :namespace (crosswalk :factual_id "eb67e10b-b103-41be-8bb5-e077855b7ae7"))
 	("menupages" "manta" "loopt" "urbanspoon" "yp" "gowalla" "yellowbook" "insiderpages" "chow" "merchantcircle" "citysearch" "yahoolocal" "yelp" "urbanspoon" "yp" "allmenus" "menupages" "simplegeo" "foursquare")
 
-Let's create a function that takes a :factual_id and returns a hashmap of each valid namespace to its Crosswalk URL:
+Let's create a function that takes a :factual_id and returns a hashmap of each valid namespace associated with its Crosswalk URL:
 
 	(defn namespaces->urls [factid]
-	  (let [crosswalks (crosswalk :factual_id factid)]
-	    (reduce
-	     #(assoc %1 (:namespace %2) (:url %2))
-	     {}
-	     crosswalks)))
+	  (into {} (map #(do {(:namespace %) (:url %)})
+	    (crosswalk :factual_id factid))))
 
 Now we can do this:
 
