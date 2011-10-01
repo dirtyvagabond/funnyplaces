@@ -63,18 +63,18 @@
     (GenericUrl. (str *base-url* path))
     (.putAll (coerce opts))))
 
-(defn tug-meta [res]
-  (let [data (get-in res [:response :data])
-        level1 (dissoc res :response)
-        level2 (dissoc (:response res) :data)]
-    (with-meta data (merge level1 level2))))
+(defn do-meta [res]
+  (let [data (get-in res [:response :data])]
+    (with-meta data (merge
+                     (dissoc res :response)
+                     {:response (dissoc (:response res) :data)}))))
 
 (defn get-results
   "Executes the specified query and returns the results.
    The returned results will have metadata associated with it,
    built from the results metadata returned by Factual."
   ([gurl]
-     (tug-meta (read-json (get-resp gurl))))
+     (do-meta (read-json (get-resp gurl))))
   ([path opts]
      (get-results (make-gurl path opts))))
 
@@ -91,4 +91,3 @@
 
 (defn crosswalk [& {:as opts}]
   (get-results "places/crosswalk" opts))
-
