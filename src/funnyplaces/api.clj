@@ -41,7 +41,7 @@
 
 (defn coerce
   "Grooms the specified hashmap of query parameters for url inclusion.
-   - keys are coerced to strings
+   - keyword keys are coerced to strings
    - values are coerced to json string representations"
   [opts]
   (reduce
