@@ -1,25 +1,17 @@
 (ns funnyplaces.api
-  
   (:refer-clojure :exclude [resolve])
-
   (:import (com.google.api.client.auth.oauth OAuthHmacSigner OAuthParameters))
-
   (:import (com.google.api.client.http.javanet NetHttpTransport))
-
   (:use [clojure.contrib.duck-streams :only [slurp*]]
-
         [clojure.contrib.json]
-
         [clojure.contrib.string :only [as-str]]
-
         [slingshot.slingshot :only [throw+]])
-
   (:import (com.google.api.client.http GenericUrl HttpResponseException)))
   
 
 (declare *factual-config*)
 
-(defrecord bad-resp [code message])
+(defrecord bad-resp [code message opts])
 
 (def *base-url* "http://api.v3.factual.com/")
 
@@ -28,7 +20,8 @@
   (def *factual-config* {:key client-key :secret client-secret}))
 
 (defn make-params
-  "Returns configured OAuth params for the specified request"
+  "Returns configured OAuth params for the specified request.
+   gurl must be a GenericUrl."
   [gurl method]
   (let [signer (OAuthHmacSigner.)
         params (OAuthParameters.)]
@@ -41,14 +34,18 @@
     (.computeSignature params method gurl)
     params))
 
-(defn make-req [gurl]
+(defn make-req
+  "gurl must be a GenericUrl."
+  [gurl]
   (.buildGetRequest 
     (.createRequestFactory
       (NetHttpTransport.)
       (make-params gurl "GET"))
     gurl))
 
-(defn get-resp [gurl]
+(defn get-resp
+  "gurl must be a GenericUrl."
+  [gurl]
   (slurp* (.getContent (.execute (make-req gurl)))))
 
 (defn coerce
@@ -64,16 +61,20 @@
           (json-str (val %2))))
    {} opts))
 
-(defn make-gurl
+(defn make-gurl-map
   "Builds a GenericUrl pointing to the given path on Factual's API.
    opts should be a hashmap with all desired query parameters for
    the resulting url. Values in opts should be primitives or hashmaps;
    they will be coerced to the proper json string representation for
-   inclusion in the url query string."
+   inclusion in the url query string.
+
+   Returns a hash-map that holds the GenericUrl (as :gurl), as well as
+   the opts (as :opts). This is useful later for error handling, in order
+   to include opts in the thrown error."
   [path opts]
-  (doto
-    (GenericUrl. (str *base-url* path))
-    (.putAll (coerce opts))))
+  (let [gurl (GenericUrl. (str *base-url* path))]
+    (.putAll gurl (coerce opts))
+    {:gurl gurl :opts opts}))
 
 (defn do-meta [res]
   (let [data (get-in res [:response :data])]
@@ -82,28 +83,30 @@
                      {:response (dissoc (:response res) :data)}))))
 
 (defn new-bad-resp
-  "Given an HttpResponseException, returns a bad-resp struct representing
+  "Given an HttpResponseException, returns a bad-resp record representing
    the error response, which can be thrown by slingshot."
-  [hre]
+  [hre gurl-map]
   (let [res (. hre response)
         code (. res statusCode)
-        msg (. res statusMessage)]
-    (throw+ (bad-resp. code msg))))
+        msg (. res statusMessage)
+        opts (:opts gurl-map)]
+    (throw+ (bad-resp. code msg opts))))
 
 (defn get-results
   "Executes the specified query and returns the results.
    The returned results will have metadata associated with it,
    built from the results metadata returned by Factual.
 
-   In the case of a bad response code, throws a bad-response struct
-   as a slingshot stone."
-  ([gurl]
+   In the case of a bad response code, throws a bad-response record
+   as a slingshot stone. The record will include any opts that were
+   passed in by user code."
+  ([gurl-map]
      (try
-       (do-meta (read-json (get-resp gurl)))
+       (do-meta (read-json (get-resp (:gurl gurl-map))))
        (catch HttpResponseException hre
-         (throw+ (new-bad-resp hre)))))
+         (throw+ (new-bad-resp hre gurl-map)))))
   ([path opts]
-     (get-results (make-gurl path opts))))
+     (get-results (make-gurl-map path opts))))
 
 (defn fetch [table & {:as opts}]
   (get-results (str "t/" (as-str table)) opts))
