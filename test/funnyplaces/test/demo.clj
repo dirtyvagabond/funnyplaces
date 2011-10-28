@@ -59,5 +59,5 @@
    (fun/fetch :places :filters {:factual_id "97598010-433f-4946-8fd5-4a6dd1639d77" :BAD :PARAM!})
    (catch bad-resp {code :code message :message opts :opts}
      (println "Got bad resp code:" code)
-     (print "Message:" message)
+     (println "Message:" message)
      (println "Opts:" opts))))

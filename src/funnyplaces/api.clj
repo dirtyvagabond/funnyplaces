@@ -90,7 +90,7 @@
         code (. res statusCode)
         msg (. res statusMessage)
         opts (:opts gurl-map)]
-    (throw+ (bad-resp. code msg opts))))
+    (bad-resp. code msg opts)))
 
 (defn get-results
   "Executes the specified query and returns the results.
