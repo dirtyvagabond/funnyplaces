@@ -7,25 +7,26 @@ Factual's [web-based API](http://developer.factual.com) offers:
 * Places API: Rich queries across a high quality dataset of U.S. Points of Interest and business entities.
 * Crosswalk: Translation between Factual IDs, third party IDs, and URLs that represent the same entity across the internet.
 * Crossref: Lets you find URLs that contain entities in the Factual places database, or to find the Factual ID of a place mentioned on a URL.
+* Resolve: An entity resolution API that makes partial records complete, matches one entity against another, and assists in de-duping and normalizing datasets.
 
 # Installation
 
 Funnyplaces is hosted at [Clojars](http://clojars.org/funnyplaces). Just add this to your dependencies:
 
-	[funnyplaces "1.0-alpha-SNAPSHOT"]
+	[funnyplaces "1.1-alpha-SNAPSHOT"]
 
 # Basics
 
 ## Setup
 
 	(ns yournamespace.core
-	  (:use funnyplaces.api))
-	(factual! "YOUR_FACTUAL_KEY" "YOUR_FACTUAL_SECRET")
+	  (:use [funnyplaces.api :as fun]))
+	(fun/factual! "YOUR_FACTUAL_KEY" "YOUR_FACTUAL_SECRET")
 
 ## Simple Fetch
 
 	;; Fetch 3 random Places from Factual
-	(fetch :places :limit 3)
+	(fun/fetch :places :limit 3)
 
 <tt>fetch</tt> takes the table name as the first argument, followed by a list of option pairs. It returns a sequence of records, where each record is a hashmap representing a row of results. So our results from above will look like:
 
@@ -36,71 +37,96 @@ Funnyplaces is hosted at [Clojars](http://clojars.org/funnyplaces). Just add thi
 This means it's easy to compose concise queries. For example:
 
 	;; Get the names of 3 Places from Factual
-	> (map :name (fetch :places :limit 3))
+	> (map :name (fun/fetch :places :limit 3))
 	("Lorillard Tobacco Co." "Imediahouse" "El Monte Wholesale Meats")
 
 ## More Fetch Examples
 
 	;; Return rows where region equals "CA"
-	(fetch :places :filters {"region" "CA"})
+	(fun/fetch :places :filters {"region" "CA"})
 
 	;; Return rows where name begins with "Starbucks" and return both the data and a total count of the matched rows:
-	(fetch :places :filters {:name {:$bw "Starbucks"}} :include_count true)
+	(fun/fetch :places :filters {:name {:$bw "Starbucks"}} :include_count true)
 
 	;; Do a full text search for rows that contain "Starbucks" or "Santa Monica"
-	(fetch :places :q "Starbucks,Santa Monica")
+	(fun/fetch :places :q "Starbucks,Santa Monica")
 
 	;; Do a full text search for rows that contain "Starbucks" or "Santa Monica" and return rows 20-40
-	(fetch :places :q "Starbucks,Santa Monica" :offset 20 :limit 20)
+	(fun/fetch :places :q "Starbucks,Santa Monica" :offset 20 :limit 20)
 
 # Places Usage
 
 	;; Return rows with a name equal to "Stand" within 5000 meters of the specified lat/lng
-	(fetch :places
+	(fun/fetch :places
 	       :filters {:name "Stand"}
 	       :geo {:$circle {:$center [34.06018, -118.41835] :$meters 5000}})
 
 # Crosswalk Usage
 
 	;; Return all Crosswalk data for the place identified by the specified Factual ID
-	(crosswalk :factual_id "97598010-433f-4946-8fd5-4a6dd1639d77")
+	(fun/crosswalk :factual_id "97598010-433f-4946-8fd5-4a6dd1639d77")
 
 	;; Return Loopt.com Crosswalk data for the place identified by the specified Factual ID
-	(crosswalk :factual_id "97598010-433f-4946-8fd5-4a6dd1639d77" :only "loopt")
+	(fun/crosswalk :factual_id "97598010-433f-4946-8fd5-4a6dd1639d77" :only "loopt")
 
 	;; Return all Crosswalk data for the place identified by the specified Foursquare ID
-	(crosswalk :namespace "foursquare" :namespace_id 215159)
+	(fun/crosswalk :namespace "foursquare" :namespace_id 215159)
 
 	;; Return the Yelp.com Crosswalk data for the place identified by the specified Foursquare ID: 
-	(crosswalk :namespace "foursquare" :namespace_id 215159 :only "yelp")
+	(fun/crosswalk :namespace "foursquare" :namespace_id 215159 :only "yelp")
 
 # Crossref Usage
 
 The <tt>get-factid</tt> function takes a URL and returns the Factual ID for the place mentioned on the specified URL. For example: 
 
-	> (get-factid "https://foursquare.com/venue/215159")
+	> (fun/get-factid "https://foursquare.com/venue/215159")
 	[{:url "https://foursquare.com/venue/215159", :is_canonical true, :factual_id "97598010-433f-4946-8fd5-4a6dd1639d77"}]
 
 The <tt>get-urls</tt> function takes a Factual ID and returns URLs that mention that place. For example:
 
 	;; Return all URLs where the place identified by the specified Factual ID is mentioned
-	(get-urls "97598010-433f-4946-8fd5-4a6dd1639d77")
+	(fun/get-urls "97598010-433f-4946-8fd5-4a6dd1639d77")
+
+# Resolve Usage
+
+The <tt>resolve</tt> function takes a hash-map of values indicating what you know about a place. It returns the set of potential matches, including a similarity score.
+
+	> (fun/resolve {"name" "ino", "latitude" 40.73, "longitude" -74.01}))
+	
+The <tt>resolved</tt> function takes a hash-map of values indicating what you know about a place. It returns the set of potential matches, including a similarity score.
+
+	> (fun/resolved {"name" "ino", "latitude" 40.73, "longitude" -74.01}))
 
 # Results Metadata
 
 Factual's API returns more than just results rows. It also returns various metadata about the results. You can access this metadata by using Clojure's <tt>meta</tt> function on your results. Examples:
 
-	> (meta (fetch :places :filters {:name {:$bw "Starbucks"}} :include_count true))
+	> (meta (fun/fetch :places :filters {:name {:$bw "Starbucks"}} :include_count true))
 	{:total_row_count 8751, :included_rows 20, :version 3, :status "ok"}
 
-	> (meta (crosswalk :factual_id "97598010-433f-4946-8fd5-4a6dd1639d77"))
+	> (meta (fun/crosswalk :factual_id "97598010-433f-4946-8fd5-4a6dd1639d77"))
 	{:total_row_count 13, :included_rows 13, :version 3, :status "ok"}
 
-	> (meta (get-factid "https://foursquare.com/venue/215159"))
+	> (meta (fun/get-factid "https://foursquare.com/venue/215159"))
 	{:total_row_count 1, :included_rows 1, :version 3, :status "ok"}
 
-	> (meta (get-urls "97598010-433f-4946-8fd5-4a6dd1639d77" :limit 12))
+	> (meta (fun/get-urls "97598010-433f-4946-8fd5-4a6dd1639d77" :limit 12))
 	{:total_row_count 66, :included_rows 12, :version 3, :status "ok"}
+
+# Handling Bad Responses
+
+If Factual's API returns a bad response, it will be thrown as a record called bad-resp, as slingshot stone. 
+
+The bad-resp will contain information about the error, including the server response code and any options you used to create the query.
+
+Example:
+
+	(try+
+	  (fun/fetch :places :filters {:factual_id "97598010-433f-4946-8fd5-4a6dd1639d77" :BAD :PARAM!})
+	  (catch bad-resp {code :code message :message opts :opts}
+	    (println "Got bad resp code:" code)
+	    (print "Message:" message)
+	    (println "Opts:" opts)))
 
 # An Example of Tying Things Together
 
@@ -109,7 +135,7 @@ Let's create a simple function that finds Places close to a lat/lng, with "cafe"
 	(defn nearby-cafes
 	  "Returns up to 12 cafes within 5000 meters of the specified location."
 	  [lat lon]
-	  (fetch :places
+	  (fun/fetch :places
 	         :q "cafe"
 	         :filters {:category {:$eq "Food & Beverage"}}
 	         :geo {:$circle {:$center [lat lon]
@@ -150,7 +176,7 @@ That first one, "Aroma Cafe", sounds interesting. Let's see the details:
 
 So I wonder what Yelp has to say about this place. Let's use Crosswalk to find out. Note that we use Aroma Cafe's :factual_id from the above results...
 
-	> (crosswalk :factual_id "eb67e10b-b103-41be-8bb5-e077855b7ae7" :only "yelp")
+	> (fun/crosswalk :factual_id "eb67e10b-b103-41be-8bb5-e077855b7ae7" :only "yelp")
 	[{:url "http://www.yelp.com/biz/aroma-cafe-los-angeles", :factual_id "eb67e10b-b103-41be-8bb5-e077855b7ae7", :namespace_id "AmtMwS2wCbr3l-_S0d9AoQ", :namespace "yelp"}]
 
 That gives me the yelp URL for the Aroma Cafe, so I can read up on it.
@@ -164,7 +190,7 @@ Let's create a function that takes a :factual_id and returns a hashmap of each v
 
 	(defn namespaces->urls [factid]
 	  (into {} (map #(do {(:namespace %) (:url %)})
-	    (crosswalk :factual_id factid))))
+	    (fun/crosswalk :factual_id factid))))
 
 Now we can do this:
 
