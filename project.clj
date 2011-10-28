@@ -1,10 +1,11 @@
-(defproject funnyplaces "1.0-alpha-SNAPSHOT"
+(defproject funnyplaces "1.1-alpha-SNAPSHOT"
   :description "An experimental Clojure client library for Factual's Places API"
   :dependencies [
     [com.google.api.client/google-api-client "1.4.1-beta"]
     [com.google.guava/guava "r09"]
     [org.clojure/clojure "1.2.1"]
     [org.clojure/clojure-contrib "1.2.0"]
+    [slingshot "0.8.0"]
   ]
 
   :dev-dependencies [

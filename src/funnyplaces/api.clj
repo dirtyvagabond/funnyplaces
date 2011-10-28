@@ -1,10 +1,12 @@
 (ns funnyplaces.api
+  (:refer-clojure :exclude [resolve])
   (:import (com.google.api.client.auth.oauth OAuthHmacSigner OAuthParameters))
   (:import (com.google.api.client.http.javanet NetHttpTransport))
-  (:use [clojure.contrib.duck-streams :only [slurp*]])
-  (:use [clojure.contrib.json])
-  (:use [clojure.contrib.string :only [as-str]])
-  (:import (com.google.api.client.http GenericUrl)))
+  (:use [clojure.contrib.duck-streams :only [slurp*]]
+        [clojure.contrib.json]
+        [clojure.contrib.string :only [as-str]]
+        [slingshot.slingshot :only [throw+]])
+  (:import (com.google.api.client.http GenericUrl HttpResponseException)))
   
 
 (declare *factual-config*)
@@ -69,12 +71,24 @@
                      (dissoc res :response)
                      {:response (dissoc (:response res) :data)}))))
 
+(defn stone
+  "Given an HttpResponseException, returns a hashmap representing
+   the error response, which can be thrown by slingshot."
+  [hre]
+  (let [res (. hre response)
+        status (. res statusCode)
+        msg (. res statusMessage)]
+    (throw+ {:status status :message msg})))
+
 (defn get-results
   "Executes the specified query and returns the results.
    The returned results will have metadata associated with it,
    built from the results metadata returned by Factual."
   ([gurl]
-     (do-meta (read-json (get-resp gurl))))
+     (try
+       (do-meta (read-json (get-resp gurl)))
+       (catch HttpResponseException hre
+         (throw+ (stone hre)))))
   ([path opts]
      (get-results (make-gurl path opts))))
 
@@ -90,4 +104,12 @@
     (get-results "places/crossref" opts)))
 
 (defn crosswalk [& {:as opts}]
-  (get-results "places/crosswalk" opts))
+  (map #(update-in % [:namespace] keyword)
+       (get-results "places/crosswalk" opts)))
+
+(defn resolve [values]
+  (get-results "places/resolve" {:values values}))
+
+(defn resolved [values]
+  (first (filter :resolved
+                 (get-results "places/resolve" {:values values}))))
