@@ -93,7 +93,7 @@ The <tt>resolve</tt> function takes a hash-map of values indicating what you kno
 
 	> (fun/resolve {"name" "ino", "latitude" 40.73, "longitude" -74.01}))
 	
-The <tt>resolved</tt> function takes a hash-map of values indicating what you know about a place. It returns the set of potential matches, including a similarity score.
+The <tt>resolved</tt> function takes a hash-map of values indicating what you know about a place. It returns either a certain match, or nil.
 
 	> (fun/resolved {"name" "ino", "latitude" 40.73, "longitude" -74.01}))
 
@@ -121,6 +121,8 @@ The bad-resp will contain information about the error, including the server resp
 
 Example:
 
+	;  (:import [funnyplaces.api bad-resp])
+	
 	(try+
 	  (fun/fetch :places :filters {:factual_id "97598010-433f-4946-8fd5-4a6dd1639d77" :BAD :PARAM!})
 	  (catch bad-resp {code :code message :message opts :opts}
