@@ -1,15 +1,25 @@
 (ns funnyplaces.api
+  
   (:refer-clojure :exclude [resolve])
+
   (:import (com.google.api.client.auth.oauth OAuthHmacSigner OAuthParameters))
+
   (:import (com.google.api.client.http.javanet NetHttpTransport))
+
   (:use [clojure.contrib.duck-streams :only [slurp*]]
+
         [clojure.contrib.json]
+
         [clojure.contrib.string :only [as-str]]
+
         [slingshot.slingshot :only [throw+]])
+
   (:import (com.google.api.client.http GenericUrl HttpResponseException)))
   
 
 (declare *factual-config*)
+
+(defrecord bad-resp [code message])
 
 (def *base-url* "http://api.v3.factual.com/")
 
@@ -71,24 +81,27 @@
                      (dissoc res :response)
                      {:response (dissoc (:response res) :data)}))))
 
-(defn stone
-  "Given an HttpResponseException, returns a hashmap representing
+(defn new-bad-resp
+  "Given an HttpResponseException, returns a bad-resp struct representing
    the error response, which can be thrown by slingshot."
   [hre]
   (let [res (. hre response)
-        status (. res statusCode)
+        code (. res statusCode)
         msg (. res statusMessage)]
-    (throw+ {:status status :message msg})))
+    (throw+ (bad-resp. code msg))))
 
 (defn get-results
   "Executes the specified query and returns the results.
    The returned results will have metadata associated with it,
-   built from the results metadata returned by Factual."
+   built from the results metadata returned by Factual.
+
+   In the case of a bad response code, throws a bad-response struct
+   as a slingshot stone."
   ([gurl]
      (try
        (do-meta (read-json (get-resp gurl)))
        (catch HttpResponseException hre
-         (throw+ (stone hre)))))
+         (throw+ (new-bad-resp hre)))))
   ([path opts]
      (get-results (make-gurl path opts))))
 

@@ -1,6 +1,8 @@
 (ns funnyplaces.demo
   (:require [funnyplaces.api :as fun])
-  (:use [clojure.contrib.json]
+  (:import [funnyplaces.api bad-resp])
+  (:use [slingshot.slingshot]
+        [clojure.contrib.json]
         [clojure.contrib.pprint]))
 
 (defn connect
@@ -10,8 +12,6 @@
   []
   (let [auth (read-json (slurp "resources/oauth.json"))]
     (fun/factual! (:key auth) (:secret auth))))
-
-;;; (fetch :places :q "coloft")
 
 (defn find-coloft []
   (first
@@ -44,3 +44,12 @@
    based on a lat lon."
   []
   (fun/resolved {"name" "ino", "latitude" 40.73, "longitude" -74.01}))
+
+(defn demo-bad-resp
+  "Illustrates how to catch an Exception thrown
+   by a bad response, and inspect it."
+  []
+  (try+
+   (fun/fetch :places :bad :query!)
+   (catch bad-resp {code :code}
+     (println "Got bad resp code:" code))))
