@@ -4,14 +4,13 @@
   (:import (com.google.api.client.http.javanet NetHttpTransport))
   (:use [clojure.contrib.duck-streams :only [slurp*]]
         [clojure.contrib.json]
-        [clojure.contrib.string :only [as-str]]
         [slingshot.slingshot :only [throw+]])
   (:import (com.google.api.client.http GenericUrl HttpResponseException)))
   
 
 (declare *factual-config*)
 
-(defrecord bad-resp [code message opts])
+(defrecord funnyplaces-error [code message opts])
 
 (def *base-url* "http://api.v3.factual.com/")
 
@@ -55,7 +54,7 @@
   [opts]
   (reduce
    #(assoc %1
-      (as-str (key %2))
+      (name (key %2))
       (if (string? (val %2))
           (val %2)
           (json-str (val %2))))
@@ -82,34 +81,34 @@
                      (dissoc res :response)
                      {:response (dissoc (:response res) :data)}))))
 
-(defn new-bad-resp
-  "Given an HttpResponseException, returns a bad-resp record representing
+(defn new-error
+  "Given an HttpResponseException, returns a funnyplaces-error record representing
    the error response, which can be thrown by slingshot."
   [hre gurl-map]
   (let [res (. hre response)
         code (. res statusCode)
         msg (. res statusMessage)
         opts (:opts gurl-map)]
-    (bad-resp. code msg opts)))
+    (funnyplaces-error. code msg opts)))
 
 (defn get-results
   "Executes the specified query and returns the results.
    The returned results will have metadata associated with it,
    built from the results metadata returned by Factual.
 
-   In the case of a bad response code, throws a bad-response record
+   In the case of a bad response code, throws a funnyplaces-error record
    as a slingshot stone. The record will include any opts that were
    passed in by user code."
   ([gurl-map]
      (try
        (do-meta (read-json (get-resp (:gurl gurl-map))))
        (catch HttpResponseException hre
-         (throw+ (new-bad-resp hre gurl-map)))))
+         (throw+ (new-error hre gurl-map)))))
   ([path opts]
      (get-results (make-gurl-map path opts))))
 
 (defn fetch [table & {:as opts}]
-  (get-results (str "t/" (as-str table)) opts))
+  (get-results (str "t/" (name table)) opts))
 
 (defn get-factid [url & {:as opts}]
   (let [opts (assoc opts :url url)]

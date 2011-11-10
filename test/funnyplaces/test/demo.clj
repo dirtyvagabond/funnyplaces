@@ -1,6 +1,6 @@
 (ns funnyplaces.demo
   (:require [funnyplaces.api :as fun])
-  (:import [funnyplaces.api bad-resp])
+  (:import [funnyplaces.api funnyplaces-error])
   (:use [slingshot.slingshot]
         [clojure.contrib.json]
         [clojure.contrib.pprint]))
@@ -50,14 +50,14 @@
   []
   (fun/crosswalk :factual_id "97598010-433f-4946-8fd5-4a6dd1639d77"))
 
-(defn demo-bad-resp
+(defn demo-error
   "Illustrates how to catch an error thrown by a bad response, and inspect it.
-   The bad-resp record that results contains useful information, such as the
+   The funnyplaces-error record that results contains useful information, such as the
    status code, and the options you sent in to the query as a hash-map."
   []
   (try+
    (fun/fetch :places :filters {:factual_id "97598010-433f-4946-8fd5-4a6dd1639d77" :BAD :PARAM!})
-   (catch bad-resp {code :code message :message opts :opts}
+   (catch funnyplaces-error {code :code message :message opts :opts}
      (println "Got bad resp code:" code)
      (println "Message:" message)
      (println "Opts:" opts))))
