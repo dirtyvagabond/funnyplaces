@@ -115,17 +115,17 @@ Factual's API returns more than just results rows. It also returns various metad
 
 # Handling Bad Responses
 
-If Factual's API returns a bad response, it will be thrown as a record called bad-resp, as slingshot stone. 
+Funnyplaces uses the Slingshot library to indicate API errors. If Funnyplaces encounters an API error, a Slingshot stone called funnyplaces-error will be thrown.
 
-The bad-resp will contain information about the error, including the server response code and any options you used to create the query.
+The funnyplaces-error will contain information about the error, including the server response code and any options you used to create the query.
 
 Example:
 
-	;  (:import [funnyplaces.api bad-resp])
+	;  (:import [funnyplaces.api funnyplaces-error])
 	
 	(try+
 	  (fun/fetch :places :filters {:factual_id "97598010-433f-4946-8fd5-4a6dd1639d77" :BAD :PARAM!})
-	  (catch bad-resp {code :code message :message opts :opts}
+	  (catch funnyplaces-error {code :code message :message opts :opts}
 	    (println "Got bad resp code:" code)
 	    (println "Message:" message)
 	    (println "Opts:" opts)))
