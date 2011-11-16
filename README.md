@@ -1,6 +1,6 @@
 # About
 
-Funnyplaces is a Clojure client for Factual's API. It supports rich queries across Factual's U.S. Places, Crosswalk, and Crossref services.
+Funnyplaces is a Clojure client for Factual's API. It supports rich queries across Factual's U.S. Places, Crosswalk, and Crossref, and Resolve services.
 
 Factual's [web-based API](http://developer.factual.com) offers:
 
