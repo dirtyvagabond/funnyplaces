@@ -15,8 +15,8 @@
 (def *base-url* "http://api.v3.factual.com/")
 
 (defn factual!
-  [client-key client-secret]
-  (def *factual-config* {:key client-key :secret client-secret}))
+  [key secret]
+  (def *factual-config* {:key key :secret secret}))
 
 (defn make-params
   "Returns configured OAuth params for the specified request.
@@ -47,43 +47,40 @@
   [gurl]
   (slurp* (.getContent (.execute (make-req gurl)))))
 
-(defn coerce
-  "Grooms the specified hashmap of query parameters for url inclusion.
-   - keyword keys are coerced to strings
-   - values are coerced to json string representations"
-  [opts]
-  (reduce
-   #(assoc %1
-      (name (key %2))
-      (if (string? (val %2))
-          (val %2)
-          (json-str (val %2))))
-   {} opts))
-
 (defn make-gurl-map
-  "Builds a GenericUrl pointing to the given path on Factual's API.
+  "Builds a GenericUrl pointing to the given path on Factual's API,
+   and including opts as key value parameters in the query string.
+
    opts should be a hashmap with all desired query parameters for
-   the resulting url. Values in opts should be primitives or hashmaps;
+   the resulting url. Values in opts should be primitives or hash-maps;
    they will be coerced to the proper json string representation for
    inclusion in the url query string.
 
    Returns a hash-map that holds the GenericUrl (as :gurl), as well as
-   the opts (as :opts). This is useful later for error handling, in order
-   to include opts in the thrown error."
+   the original opts (as :opts). This is useful later for error
+   handling, in order to include opts in the thrown error."
   [path opts]
   (let [gurl (GenericUrl. (str *base-url* path))]
-    (.putAll gurl (coerce opts))
+    (doseq [[k v] opts]
+      (.put gurl
+        ;; query param name    
+        (name k)
+        ;; query param value
+        (if (or (keyword? v) (string? v))
+          (name v)
+          (json-str v))))
     {:gurl gurl :opts opts}))
 
 (defn do-meta [res]
   (let [data (get-in res [:response :data])]
     (with-meta data (merge
-                     (dissoc res :response)
-                     {:response (dissoc (:response res) :data)}))))
+                      (dissoc res :response)
+                      {:response (dissoc (:response res) :data)}))))
 
 (defn new-error
   "Given an HttpResponseException, returns a funnyplaces-error record representing
-   the error response, which can be thrown by slingshot."
+   the error response, which includes things like status code, status message, as
+   well as the original opts used to create the request."
   [hre gurl-map]
   (let [res (. hre response)
         code (. res statusCode)
