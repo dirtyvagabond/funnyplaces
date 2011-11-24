@@ -1,6 +1,6 @@
 # About
 
-Funnyplaces is a Clojure client for Factual's API. It supports rich queries across Factual's U.S. Places, Crosswalk, and Crossref services.
+Funnyplaces is a Clojure client for Factual's API. It supports rich queries across Factual's U.S. Places, Crosswalk, and Crossref, and Resolve services.
 
 Factual's [web-based API](http://developer.factual.com) offers:
 
@@ -70,10 +70,10 @@ This means it's easy to compose concise queries. For example:
 	(fun/crosswalk :factual_id "97598010-433f-4946-8fd5-4a6dd1639d77" :only "loopt")
 
 	;; Return all Crosswalk data for the place identified by the specified Foursquare ID
-	(fun/crosswalk :namespace "foursquare" :namespace_id 215159)
+	(fun/crosswalk :namespace "foursquare" :namespace_id "4ae4df6df964a520019f21e3")
 
-	;; Return the Yelp.com Crosswalk data for the place identified by the specified Foursquare ID: 
-	(fun/crosswalk :namespace "foursquare" :namespace_id 215159 :only "yelp")
+	;; Return the Yelp.com Crosswalk data for the place identified by a Foursquare ID: 
+	(fun/crosswalk :namespace "foursquare" :namespace_id "4ae4df6df964a520019f21e3" :only "yelp")
 
 # Crossref Usage
 
@@ -115,17 +115,17 @@ Factual's API returns more than just results rows. It also returns various metad
 
 # Handling Bad Responses
 
-If Factual's API returns a bad response, it will be thrown as a record called bad-resp, as slingshot stone. 
+Funnyplaces uses the Slingshot library to indicate API errors. If Funnyplaces encounters an API error, a Slingshot stone called funnyplaces-error will be thrown.
 
-The bad-resp will contain information about the error, including the server response code and any options you used to create the query.
+The funnyplaces-error will contain information about the error, including the server response code and any options you used to create the query.
 
 Example:
 
-	;  (:import [funnyplaces.api bad-resp])
+	;  (:import [funnyplaces.api funnyplaces-error])
 	
 	(try+
 	  (fun/fetch :places :filters {:factual_id "97598010-433f-4946-8fd5-4a6dd1639d77" :BAD :PARAM!})
-	  (catch bad-resp {code :code message :message opts :opts}
+	  (catch funnyplaces-error {code :code message :message opts :opts}
 	    (println "Got bad resp code:" code)
 	    (println "Message:" message)
 	    (println "Opts:" opts)))
@@ -179,14 +179,17 @@ That first one, "Aroma Cafe", sounds interesting. Let's see the details:
 So I wonder what Yelp has to say about this place. Let's use Crosswalk to find out. Note that we use Aroma Cafe's :factual_id from the above results...
 
 	> (fun/crosswalk :factual_id "eb67e10b-b103-41be-8bb5-e077855b7ae7" :only "yelp")
-	[{:url "http://www.yelp.com/biz/aroma-cafe-los-angeles", :factual_id "eb67e10b-b103-41be-8bb5-e077855b7ae7", :namespace_id "AmtMwS2wCbr3l-_S0d9AoQ", :namespace "yelp"}]
-
-That gives me the yelp URL for the Aroma Cafe, so I can read up on it.
+	({:factual_id "eb67e10b-b103-41be-8bb5-e077855b7ae7",
+	  :namespace :yelp,
+	  :namespace_id "AmtMwS2wCbr3l-_S0d9AoQ",
+	  :url "http://www.yelp.com/biz/aroma-cafe-los-angeles"})
+	  
+That gives me the yelp URL for the Aroma Cafe, so I can read up on it on Yelp.com.
 
 Of course, Factual supports other Crosswalked sources besides Yelp. If you look at each row returned by the <tt>crosswalk</tt> function, you'll see there's a <tt>:namespace</tt> in each one. Let's find out what namespaces are available for the Aroma Cafe:
 
-	> (map :namespace (crosswalk :factual_id "eb67e10b-b103-41be-8bb5-e077855b7ae7"))
-	("menupages" "manta" "loopt" "urbanspoon" "yp" "gowalla" "yellowbook" "insiderpages" "chow" "merchantcircle" "citysearch" "yahoolocal" "yelp" "urbanspoon" "yp" "allmenus" "menupages" "simplegeo" "foursquare")
+	> (map :namespace (fun/crosswalk :factual_id "eb67e10b-b103-41be-8bb5-e077855b7ae7"))
+	(:merchantcircle :urbanspoon :yahoolocal :foursquare :yelp ... )
 
 Let's create a function that takes a :factual_id and returns a hashmap of each valid namespace associated with its Crosswalk URL:
 
@@ -197,8 +200,9 @@ Let's create a function that takes a :factual_id and returns a hashmap of each v
 Now we can do this:
 
 	> (namespaces->urls "eb67e10b-b103-41be-8bb5-e077855b7ae7")
-	{"foursquare"  "https://foursquare.com/venue/38146", 
-	 "menupages"   "http://losangeles.menupages.com/restaurants/the-westside-city/", 
-	 "manta"       "http://www.manta.com/c/mmcw5s5/aroma-cafe", 
-	 "yahoolocal"  "http://local.yahoo.com/info-20400708-aroma-cafe-los-angeles",
+	{:merchantcircle   "http://www.merchantcircle.com/business/Aroma.Cafe.310-836-2919",
+ 	 :urbanspoon	   "http://www.urbanspoon.com/r/5/60984/restaurant/West-Los-Angeles/Bali-Place-LA",
+ 	 :yahoolocal       "http://local.yahoo.com/info-20400708-aroma-cafe-los-angeles",
+ 	 :foursquare       "https://foursquare.com/venue/46f53d65f964a520f04a1fe3",
+ 	 :yelp             "http://www.yelp.com/biz/aroma-cafe-los-angeles",	
 	 ... }
