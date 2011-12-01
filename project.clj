@@ -5,7 +5,7 @@
     [com.google.guava/guava "r09"]
     [org.clojure/clojure "1.2.1"]
     [org.clojure/clojure-contrib "1.2.0"]
-    [slingshot "0.8.0"]
+    [slingshot "0.9.0"]
   ]
 
   :dev-dependencies [
