@@ -1,9 +1,9 @@
 (ns funnyplaces.demo
   (:require [funnyplaces.api :as fun])
   (:import [funnyplaces.api funnyplaces-error])
+  (:use [clojure.data.json :only (json-str read-json)])
   (:use [slingshot.slingshot]
-        [clojure.contrib.json]
-        [clojure.contrib.pprint]))
+        [clojure.pprint]))
 
 (defn connect
   "Connects this demo namespace to Factual's API. You must put

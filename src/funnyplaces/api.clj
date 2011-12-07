@@ -2,9 +2,9 @@
   (:refer-clojure :exclude [resolve])
   (:import (com.google.api.client.auth.oauth OAuthHmacSigner OAuthParameters))
   (:import (com.google.api.client.http.javanet NetHttpTransport))
-  (:use [clojure.contrib.duck-streams :only [slurp*]]
-        [clojure.contrib.json]
-        [slingshot.slingshot :only [throw+]])
+  (:use [clojure.data.json :only (json-str read-json)])
+  (:use [clojure.java.io :only (reader)])
+  (:use [slingshot.slingshot :only [throw+]])
   (:import (com.google.api.client.http GenericUrl HttpResponseException)))
   
 
@@ -45,7 +45,7 @@
 (defn get-resp
   "gurl must be a GenericUrl."
   [gurl]
-  (slurp* (.getContent (.execute (make-req gurl)))))
+  (slurp (reader (.getContent (.execute (make-req gurl))))))
 
 (defn make-gurl-map
   "Builds a GenericUrl pointing to the given path on Factual's API,
