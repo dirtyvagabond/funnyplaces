@@ -8,15 +8,15 @@
   (:import (com.google.api.client.http GenericUrl HttpResponseException)))
   
 
-(declare *factual-config*)
+(declare ^:dynamic *factual-config*)
 
 (defrecord funnyplaces-error [code message opts])
 
-(def *base-url* "http://api.v3.factual.com/")
+(def ^:dynamic *base-url* "http://api.v3.factual.com/")
 
 (defn factual!
   [key secret]
-  (def *factual-config* {:key key :secret secret}))
+  (def ^:dynamic *factual-config* {:key key :secret secret}))
 
 (defn make-params
   "Returns configured OAuth params for the specified request.
