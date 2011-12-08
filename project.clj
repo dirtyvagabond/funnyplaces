@@ -3,9 +3,8 @@
   :dependencies [
     [com.google.api.client/google-api-client "1.4.1-beta"]
     [com.google.guava/guava "r09"]
-    [org.clojure/clojure "1.3.0"]
+    [org.clojure/clojure "1.4.0-alpha2"]
     [org.clojure/data.json "0.1.1"]
-    ;[org.clojure/clojure-contrib "1.2.0"]
     [slingshot "0.9.0"]
   ]
 
