@@ -5,8 +5,10 @@
   (:use [clojure.data.json :only (json-str read-json)])
   (:use [clojure.java.io :only (reader)])
   (:use [slingshot.slingshot :only [throw+]])
-  (:import (com.google.api.client.http GenericUrl HttpResponseException)))
+  (:import (com.google.api.client.http GenericUrl HttpResponseException HttpHeaders)))
   
+
+(def DRIVER_VERSION_TAG "factual-clojure-driver-v1.2")
 
 (declare ^:dynamic *factual-config*)
 
@@ -36,11 +38,13 @@
 (defn make-req
   "gurl must be a GenericUrl."
   [gurl]
-  (.buildGetRequest 
-    (.createRequestFactory
-      (NetHttpTransport.)
-      (make-params gurl "GET"))
-    gurl))
+  (let [params (make-params gurl "GET")
+        factory (.createRequestFactory (NetHttpTransport.) params)
+        req (.buildGetRequest factory gurl)
+        heads (HttpHeaders.)]
+    (.set heads "X-FACTUAL-LIB" DRIVER_VERSION_TAG)
+    (set! (. req headers) heads)
+    req))
 
 (defn get-resp
   "gurl must be a GenericUrl."
