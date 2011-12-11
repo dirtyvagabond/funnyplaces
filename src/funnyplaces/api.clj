@@ -42,7 +42,7 @@
         factory (.createRequestFactory (NetHttpTransport.) params)
         req (.buildGetRequest factory gurl)
         heads (HttpHeaders.)]
-    (.set heads "X-FACTUAL-LIB" DRIVER_VERSION_TAG)
+    (.set heads "X-Factual-Lib" DRIVER_VERSION_TAG)
     (set! (. req headers) heads)
     req))
 
