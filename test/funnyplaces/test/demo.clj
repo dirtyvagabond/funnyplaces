@@ -50,6 +50,24 @@
   []
   (fun/crosswalk :factual_id "97598010-433f-4946-8fd5-4a6dd1639d77"))
 
+(defn deliver-dinner [lat lon]
+  (fun/fetch :restaurants-us
+             :filters {:meal_dinner {:$eq true}
+                       :meal_deliver {:$eq true}}
+             :geo {:$circle {:$center [lat lon]
+                             :$meters 4500}}
+             :sort :$distance))
+
+(defn chiang-mai-open []
+  (get-in (meta
+           (fun/fetch :global
+                      :include_count true
+                      :filters {:country {:$eq "TH"}
+                                :region {:$eq "Chiang Mai"}
+                                :status {:$eq 1}
+                                :tel {:$blank false}}))
+          [:response :total_row_count]))
+
 (defn demo-error
   "Illustrates how to catch an error thrown by a bad response, and inspect it.
    The funnyplaces-error record that results contains useful information, such as the

@@ -1,10 +1,10 @@
 # About
 
-Funnyplaces is a Clojure client for Factual's API. It supports rich queries across Factual's U.S. Places, Crosswalk, and Crossref, and Resolve services.
+Funnyplaces is a Clojure client for Factual's API. It supports rich queries across Factual's datasets, including support for the Crosswalk, Crossref, and Resolve services.
 
 Factual's [web-based API](http://developer.factual.com) offers:
 
-* Places API: Rich queries across a high quality dataset of U.S. Points of Interest and business entities.
+* Rich queries across curated datasets U.S. points of interest, global points of interest, and U.S. restaurants with long tail attributes.
 * Crosswalk: Translation between Factual IDs, third party IDs, and URLs that represent the same entity across the internet.
 * Crossref: Lets you find URLs that contain entities in the Factual places database, or to find the Factual ID of a place mentioned on a URL.
 * Resolve: An entity resolution API that makes partial records complete, matches one entity against another, and assists in de-duping and normalizing datasets.
@@ -36,9 +36,23 @@ Funnyplaces is hosted at [Clojars](http://clojars.org/funnyplaces). Just add thi
 
 This means it's easy to compose concise queries. For example:
 
-	;; Get the names of 3 Places from Factual
+	;; Sample three business names from the Places dataset (U.S. points of interest):
 	> (map :name (fun/fetch :places :limit 3))
 	("Lorillard Tobacco Co." "Imediahouse" "El Monte Wholesale Meats")
+
+	;; Return rows with a name equal to "Stand" within 5000 meters of the specified lat/lng
+	(fun/fetch :places
+	       :filters {:name "Stand"}
+	       :geo {:$circle {:$center [34.06018, -118.41835] :$meters 5000}})
+
+  ;; Find restaurants near a latitude, longitude that deliver dinner, sorted by distance:
+  (defn deliver-dinner [lat lon]
+    (fun/fetch :restaurants-us
+               :filters {:meal_dinner {:$eq true}
+                         :meal_deliver {:$eq true}}
+               :geo {:$circle {:$center [lat lon]
+                               :$meters 4500}}
+               :sort :$distance))
 
 ## More Fetch Examples
 
@@ -54,12 +68,15 @@ This means it's easy to compose concise queries. For example:
 	;; Do a full text search for rows that contain "Starbucks" or "Santa Monica" and return rows 20-40
 	(fun/fetch :places :q "Starbucks,Santa Monica" :offset 20 :limit 20)
 
-# Places Usage
-
-	;; Return rows with a name equal to "Stand" within 5000 meters of the specified lat/lng
-	(fun/fetch :places
-	       :filters {:name "Stand"}
-	       :geo {:$circle {:$center [34.06018, -118.41835] :$meters 5000}})
+  ;; Count all businesses in Chiang Mai, Thailand that are operational and have a telephone number
+  (get-in (meta
+           (fun/fetch :global
+                      :include_count true
+                      :filters {:country {:$eq "TH"}
+                                :region {:$eq "Chiang Mai"}
+                                :status {:$eq 1}
+                                :tel {:$blank false}}))
+          [:response :total_row_count])
 
 # Crosswalk Usage
 

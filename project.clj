@@ -1,4 +1,5 @@
-(defproject funnyplaces "1.2-beta"
+(defproject factual/funnyplaces "1.2-beta"
+  :url "http://github.com/dirtyvagabond/Funnyplaces"
   :description "An experimental Clojure client library for Factual's Places API"
   :dependencies [
     [com.google.api.client/google-api-client "1.4.1-beta"]
