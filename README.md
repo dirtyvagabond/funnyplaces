@@ -45,14 +45,14 @@ This means it's easy to compose concise queries. For example:
 	       :filters {:name "Stand"}
 	       :geo {:$circle {:$center [34.06018, -118.41835] :$meters 5000}})
 
-  ;; Find restaurants near a latitude, longitude that deliver dinner, sorted by distance:
-  (defn deliver-dinner [lat lon]
-    (fun/fetch :restaurants-us
-               :filters {:meal_dinner {:$eq true}
-                         :meal_deliver {:$eq true}}
-               :geo {:$circle {:$center [lat lon]
-                               :$meters 4500}}
-               :sort :$distance))
+	;; Find restaurants near a latitude, longitude that deliver dinner, sorted by distance:
+	(defn deliver-dinner [lat lon]
+	  (fun/fetch :restaurants-us
+	             :filters {:meal_dinner {:$eq true}
+	                       :meal_deliver {:$eq true}}
+	             :geo {:$circle {:$center [lat lon]
+	                             :$meters 4500}}
+	             :sort :$distance))
 
 ## More Fetch Examples
 
@@ -68,15 +68,16 @@ This means it's easy to compose concise queries. For example:
 	;; Do a full text search for rows that contain "Starbucks" or "Santa Monica" and return rows 20-40
 	(fun/fetch :places :q "Starbucks,Santa Monica" :offset 20 :limit 20)
 
-  ;; Count all businesses in Chiang Mai, Thailand that are operational and have a telephone number
-  (get-in (meta
-           (fun/fetch :global
-                      :include_count true
-                      :filters {:country {:$eq "TH"}
-                                :region {:$eq "Chiang Mai"}
-                                :status {:$eq 1}
-                                :tel {:$blank false}}))
-          [:response :total_row_count])
+	;; Count all businesses in Chiang Mai, Thailand that are operational and have a telephone number
+	(get-in
+	  (meta
+	    (fun/fetch :global
+	               :include_count true
+	               :filters {:country {:$eq "TH"}
+	               :region {:$eq "Chiang Mai"}
+	               :status {:$eq 1}
+	               :tel {:$blank false}}))
+	  [:response :total_row_count])
 
 # Crosswalk Usage
 
