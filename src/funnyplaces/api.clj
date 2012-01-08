@@ -108,8 +108,33 @@
   ([path opts]
      (get-results (make-gurl-map path opts))))
 
-(defn fetch [table & {:as opts}]
+(defn fetch
+  "Runs a fetch request against Factual and returns the results.
+   table should be a valid table name, such as :global. The query
+   is specified with the rest of the args. Examples:
+
+   (fetch :restaurants-us)
+
+   (fetch :places :q \"cafe\")
+
+   (fetch :restaurants-us
+     :q \"cafe\"
+     :offset 20
+     :limit 10
+     :filters {:name {:$bw \"starbucks\" :locality {:$eq \"los angeles\"}}))"
+  [table & {:as opts}]
   (get-results (str "t/" (name table)) opts))
+
+(defn fetch-q
+  "Uses table and query to build the proper collection of
+   arguments to fun/fetch, then applies, thereby running the
+   specified query against Factual."
+  [table query]
+  (let [args (reduce (fn [col [k v]]
+                       (conj col k v))
+                     [table]
+                     query)]
+    (apply fetch args)))
 
 (defn get-factid [url & {:as opts}]
   (let [opts (assoc opts :url url)]
