@@ -1,6 +1,6 @@
 # About
 
-Funnyplaces is a Clojure client for Factual's API. It supports rich queries across Factual's datasets, including support for the Crosswalk, Crossref, and Resolve services.
+Funnyplaces is a Clojure driver for Factual's API. It supports rich queries across Factual's datasets, including support for the Crosswalk, Crossref, and Resolve services.
 
 Factual's [web-based API](http://developer.factual.com) offers:
 
@@ -133,7 +133,7 @@ Factual's API returns more than just results rows. It also returns various metad
 
 # Handling Bad Responses
 
-Funnyplaces uses the Slingshot library to indicate API errors. If Funnyplaces encounters an API error, a Slingshot stone called funnyplaces-error will be thrown.
+Funnyplaces uses Slingshot to indicate API errors. If Funnyplaces encounters an API error, a Slingshot stone called funnyplaces-error will be thrown.
 
 The funnyplaces-error will contain information about the error, including the server response code and any options you used to create the query.
 
