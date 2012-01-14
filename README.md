@@ -115,7 +115,7 @@ This means it's easy to compose concise queries. For example:
 
 ````clojure
 ;; Return all Crosswalk data for the place identified by the specified Foursquare ID
-	(fun/crosswalk :namespace "foursquare" :namespace_id "4ae4df6df964a520019f21e3")
+(fun/crosswalk :namespace "foursquare" :namespace_id "4ae4df6df964a520019f21e3")
 ````
 
 ````clojure
