@@ -76,10 +76,14 @@
     {:gurl gurl :opts opts}))
 
 (defn do-meta [res]
-  (let [data (get-in res [:response :data])]
+  (let [data (or
+               ;; standard result set
+               (get-in res [:response :data])
+               ;; schema result
+               (get-in res [:response :view :fields]))]
     (with-meta data (merge
-                      (dissoc res :response)
-                      {:response (dissoc (:response res) :data)}))))
+                     (dissoc res :response)
+                     {:response (dissoc (:response res) :data)}))))
 
 (defn new-error
   "Given an HttpResponseException, returns a funnyplaces-error record representing
@@ -135,6 +139,9 @@
                      [table]
                      query)]
     (apply fetch args)))
+
+(defn schema [table]
+  (get-results (str "t/" (name table) "/schema") []))
 
 (defn get-factid [url & {:as opts}]
   (let [opts (assoc opts :url url)]
