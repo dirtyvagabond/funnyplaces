@@ -45,7 +45,7 @@ This means it's easy to compose concise queries. For example:
 ````clojure
 ;; Sample three business names from the Places dataset (U.S. points of interest):
 > (map :name (fun/fetch :places :limit 3))
-	("Lorillard Tobacco Co." "Imediahouse" "El Monte Wholesale Meats")
+("Lorillard Tobacco Co." "Imediahouse" "El Monte Wholesale Meats")
 ````
 
 ````clojure
@@ -191,7 +191,6 @@ Example:
 
 ````clojure
 ;  (:import [funnyplaces.api funnyplaces-error])
-	
 (try+
 	(fun/fetch :places :filters {:factual_id "97598010-433f-4946-8fd5-4a6dd1639d77" :BAD :PARAM!})
 	(catch funnyplaces-error {code :code message :message opts :opts}
