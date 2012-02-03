@@ -143,11 +143,11 @@ The <tt>get-urls</tt> function takes a Factual ID and returns URLs that mention 
 
 The <tt>resolve</tt> function takes a hash-map of values indicating what you know about a place. It returns the set of potential matches, including a similarity score.
 
-	> (fun/resolve {"name" "ino", "latitude" 40.73, "longitude" -74.01}))
+	> (fun/resolve {:name "ino", :latitude 40.73, :longitude -74.01}))
 	
 The <tt>resolved</tt> function takes a hash-map of values indicating what you know about a place. It returns either a certain match, or nil.
 
-	> (fun/resolved {"name" "ino", "latitude" 40.73, "longitude" -74.01}))
+	> (fun/resolved {:name "ino", :latitude 40.73, :longitude -74.01}))
 
 # Results Metadata
 
