@@ -74,7 +74,6 @@ Fetch will work with any Factual dataset. E.g.:
 (fun/fetch :places :limit 3)
 (fun/fetch :restaurants-us :limit 3)
 (fun/fetch :global :limit 3)
-
 ````
 
 ## More Fetch Examples
