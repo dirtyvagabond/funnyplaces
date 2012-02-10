@@ -66,6 +66,17 @@ This means it's easy to compose concise queries. For example:
 	           :sort :$distance))
 ````
 
+## Using Fetch with any Factual dataset
+
+Fetch will work with any Factual dataset. E.g.:
+
+````clojure
+(fun/fetch :places :limit 3)
+(fun/fetch :restaurants-us :limit 3)
+(fun/fetch :global :limit 3)
+
+````
+
 ## More Fetch Examples
 
 ````clojure
