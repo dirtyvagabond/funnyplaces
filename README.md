@@ -111,6 +111,107 @@ Fetch will work with any Factual dataset. E.g.:
 	  [:response :total_row_count])
 ````
 
+# Row Filters
+
+Funnyplaces supports various row filter logic. Examples:
+
+''''clojure
+;;; Fetch places whose name field starts with "Starbucks"
+(fun/fetch :places :filters {:name {:$bw "Starbucks"}})
+''''
+
+''''clojure
+;;; Fetch U.S. restaurants that have a blank telephone number
+(fun/fetch :restaurants-us :filters {:tel {:$blank true}})
+''''
+
+''''clojure
+;;; Fetch U.S. restaurants from one of five states
+(fun/fetch :restaurants-us :filters {:region {:$in ["MA", "VT", "NH", "RI", "CT"]}})
+''''
+
+## Supported row filter logic
+
+<table>
+  <tr>
+    <th>Predicate</th>
+    <th>Description</th>
+    <th>Example :filters</th>
+  </tr>
+  <tr>
+    <td>$eq</td>
+    <td>equal to</td>
+    <td><tt>{:region {:$eq "CA"}}</tt></td>
+  </tr>
+  <tr>
+    <td>$neq</td>
+    <td>not equal to</td>
+    <td><tt>{:region {:$neq "CA"}}</tt></td>
+  </tr>
+  <tr>
+    <td>$search</td>
+    <td>full text search</td>
+    <td><tt>{:name {:$search "fried chicken"}}</tt></td>
+  </tr>
+  <tr>
+    <td>$in</td>
+    <td>equals any of</td>
+    <td><tt>{:region {:$in ["MA", "VT", "NH", "RI", "CT"]}}</tt></td>
+  </tr>
+  <tr>
+    <td>$nin</td>
+    <td>does not equal any of</td>
+    <td><tt>{:region {:$nin ["MA", "VT", "NH", "RI", "CT"]}}</tt></td>
+  </tr>
+  <tr>
+    <td>$bw</td>
+    <td>begins with</td>
+    <td><tt>{:name {:$bw "starbucks"}}</tt></td>
+  </tr>
+  <tr>
+    <td>$nbw</td>
+    <td>does not begin with</td>
+    <td><tt>{:name {:$nbw "starbucks"}}</tt></td>
+  </tr>
+  <tr>
+    <td>$bwin</td>
+    <td>begins with any of</td>
+    <td><tt>{:name {:$bwin ["starbucks" "tea" "coffee"]}}</tt></td>
+  </tr>
+  <tr>
+    <td>$nbwin</td>
+    <td>does not begin with any of</td>
+    <td><tt>{:name {:$nbwin ["starbucks" "tea" "coffee"]}}</tt></td>
+  </tr>
+  <tr>
+    <td>$blank</td>
+    <td>whether is blank or null</td>
+    <td><tt>{:name {:$blank true}}<br>
+            {:name {:$blank false}}</tt></td>
+  </tr>
+  <tr>
+    <td>$gt</td>
+    <td>greater than</td>
+    <td><tt>{:rating {:$gt 3.0}}</tt></td>
+  </tr>
+  <tr>
+    <td>$gte</td>
+    <td>greater than or equal to</td>
+    <td><tt>{:rating {:$gte 3.0}}</tt></td>
+  </tr>
+  <tr>
+    <td>$lt</td>
+    <td>less than</td>
+    <td><tt>{:rating {:$lt 3.0}}</tt></td>
+  </tr>
+  <tr>
+    <td>$lte</td>
+    <td>less than or equal to</td>
+    <td><tt>{:rating {:$lte 3.0}}</tt></td>
+  </tr>
+</table>
+
+
 # Crosswalk Usage
 
 ````clojure

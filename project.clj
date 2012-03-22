@@ -6,11 +6,5 @@
     [com.google.guava/guava "r09"]
     [org.clojure/clojure "1.4.0-alpha2"]
     [org.clojure/data.json "0.1.1"]
-    [slingshot "0.9.0"]
-  ]
-
-  :dev-dependencies [
-    [swank-clojure "1.4.0-SNAPSHOT"]
-    [lein-clojars "0.6.0"]
-  ]
-)
+    [slingshot "0.9.0"]]
+  :dev-dependencies [[lein-clojars "0.6.0"]])
