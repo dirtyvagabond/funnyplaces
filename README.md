@@ -115,20 +115,20 @@ Fetch will work with any Factual dataset. E.g.:
 
 Funnyplaces supports various row filter logic. Examples:
 
-''''clojure
+````clojure
 ;;; Fetch places whose name field starts with "Starbucks"
 (fun/fetch :places :filters {:name {:$bw "Starbucks"}})
-''''
+````
 
-''''clojure
+````clojure
 ;;; Fetch U.S. restaurants that have a blank telephone number
 (fun/fetch :restaurants-us :filters {:tel {:$blank true}})
-''''
+````
 
-''''clojure
+````clojure
 ;;; Fetch U.S. restaurants from one of five states
 (fun/fetch :restaurants-us :filters {:region {:$in ["MA", "VT", "NH", "RI", "CT"]}})
-''''
+````
 
 ## Supported row filter logic
 
