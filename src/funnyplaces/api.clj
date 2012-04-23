@@ -43,7 +43,7 @@
         req (.buildGetRequest factory gurl)
         heads (HttpHeaders.)]
     (.set heads "X-Factual-Lib" DRIVER_VERSION_TAG)
-    (set! (. req headers) heads)
+    (.setHeaders req heads)
     req))
 
 (defn get-resp
