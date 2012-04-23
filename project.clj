@@ -1,4 +1,4 @@
-(defproject funnyplaces "1.2.2"
+(defproject funnyplaces "1.2.3"
   :url "http://github.com/dirtyvagabond/Funnyplaces"
   :description "A Clojure driver for Factual's public API"
   :dependencies [
