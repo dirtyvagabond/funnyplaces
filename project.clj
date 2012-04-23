@@ -1,9 +1,8 @@
-(defproject funnyplaces "1.2.1"
+(defproject funnyplaces "1.2.2"
   :url "http://github.com/dirtyvagabond/Funnyplaces"
   :description "A Clojure driver for Factual's public API"
   :dependencies [
     [com.google.api.client/google-api-client "1.4.1-beta"]
-    [com.google.guava/guava "r09"]
     [org.clojure/clojure "1.4.0-alpha2"]
     [org.clojure/data.json "0.1.1"]
     [slingshot "0.9.0"]]

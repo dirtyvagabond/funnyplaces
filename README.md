@@ -13,7 +13,7 @@ Factual's [web-based API](http://developer.factual.com) offers:
 
 Funnyplaces is hosted at [Clojars](http://clojars.org/funnyplaces). Just add this to your dependencies:
 
-	[funnyplaces "1.2.1"]
+	[funnyplaces "1.2.2"]
 
 # Basics
 
