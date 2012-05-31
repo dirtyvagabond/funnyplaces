@@ -1,3 +1,5 @@
+# THIS HAS MOVED to https://github.com/Factual/factual-clojure-driver
+
 # About
 
 Funnyplaces is a Clojure driver for Factual's API. It supports rich queries across Factual's datasets, including support for the Crosswalk, Crossref, and Resolve services.
